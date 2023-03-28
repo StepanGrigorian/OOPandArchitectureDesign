@@ -1,13 +1,8 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class WeaponModule : Module
 {
-    private void Start()
-    {
-        SetWeaponBehaviour(new WeaponBehaviour());
-    }
     [SerializeField] private float reloadTime;
     [SerializeField] private float damage;
     [SerializeField] private float rotateSpeed;
@@ -23,6 +18,11 @@ public class WeaponModule : Module
 
     private Ship target;
 
+    private void Start()
+    {
+        SetWeaponBehaviour(new WeaponBehaviour(Parent, reloadTime, damage, rotateSpeed, bulletSpeed, bulletLifeTime));
+        Parent.Weapons.Add(this);
+    }
     public void SetTarget(Ship target)
     {
         this.target = target;
@@ -40,20 +40,13 @@ public class WeaponModule : Module
                 Child.rotation, LookAt, rotateSpeed * Time.deltaTime);
             yield return new WaitForEndOfFrame();
         }
-        Shoot();
-        OnReloaded += Shoot;
-    }
-    public void Shoot()
-    {
-        if (CanShoot)
+        weapon.Shoot(BulletPrefab, Child.transform);
+        StartCoroutine(Reload());
+        OnReloaded += () => 
         {
-            var obj = Instantiate(BulletPrefab, 
-                Child.transform.position, Child.transform.rotation);
-            var bullet = obj.GetComponent<Bullet>();
-            bullet.Init(Parent, bulletSpeed, damage, bulletLifeTime);
-            CanShoot = false;
+            weapon.Shoot(BulletPrefab, Child.transform);
             StartCoroutine(Reload());
-        }
+        };
     }
     IEnumerator Reload()
     {

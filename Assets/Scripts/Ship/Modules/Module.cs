@@ -86,7 +86,5 @@ public abstract class Module : MonoBehaviour
         Parent = currentSlot.Parent;
         Slot = currentSlot;
         Parent.Modules.Add(this);
-        if (this as WeaponModule)
-            Parent.Weapons.Add((WeaponModule)this);
     }
 }
